@@ -7,19 +7,27 @@ df_b = pd.read_csv("metingen/frequency_b.csv", delimiter=";")
 df_c = pd.read_csv("metingen/frequency_c.csv", delimiter=";")
 
 
-def generate(df):
-    df_matrix = df.pivot("x", "y", "nagalmtijd")
+def generate(dfs):
+    # Create a grid of subplots with 1 row and 3 columns
+    fig, axs = plt.subplots(1, 3, figsize=(12, 4))
 
-    # Plot the heatmap with origin in the left corner
-    sns.heatmap(df_matrix, annot=True, fmt=".1f", cmap="YlGnBu", cbar_kws={"label": "My Colorbar Label"},
-            xticklabels=[str(i) for i in range(0, df_matrix.shape[1])],
-            yticklabels=[str(i) for i in range(df_matrix.shape[0]-1, -1, -1)],
-            vmin=0)
+    fig.tight_layout(pad=2)
 
-    plt.title('Nagalmtijd per positie in seconden')
-    plt.xlabel('X-axis (m)')
-    plt.ylabel('Y-axis (m)')
+    for i in range(len(dfs)):
+        df = dfs[i]
+        df_matrix = df.pivot("x (m)", "y (m)", "nagalmtijd (s)")
+
+        # Plot the heatmap with origin in the left corner
+        sns.heatmap(df_matrix, cmap="YlGnBu", annot=True, fmt=".1f", cbar=False, ax=axs[i])
+        axs[i].set_title("Heatmap " + str(i + 1))
+        axs[i].set_xlabel("X-axis (m)")
+        axs[i].set_ylabel("Y-axis (m)")
+
+    # Add a colorbar for all heatmaps
+    cbar = fig.colorbar(axs[0].collections[0], ax=axs, location="right", shrink=1)
+    cbar.ax.set_ylabel("Nagalmtijd (s)", rotation=270, labelpad=20)
+
     plt.show()
 
 
-generate(df_a)
+generate([df_a, df_b, df_c])
